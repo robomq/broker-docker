@@ -1,10 +1,10 @@
 # How to use this image 
 
-RoboMQ broker is a pre-configured messaging broker image built upon [RabbitMQ](https://www.rabbitmq.com/) 3.6.12. 
+[RoboMQ](https://robomq.io) broker is a pre-configured messaging broker image built upon [RabbitMQ](https://www.rabbitmq.com/) 3.6.12. Supporting cluster and management, it is customized for deployment in production environment. 
 
-* [Standalone Broker](#Option-1-Standalone-Broker)
-* [Clustered Broker](#Option-2-Clustered-Broker)
-* [Network Settings](#Network-Settings)
+* [Standalone Broker](#option-1-standalone-broker)
+* [Clustered Broker](#option-2-clustered-broker)
+* [Network Settings](#network-settings)
 
 ## Option 1: Standalone Broker
 
@@ -77,6 +77,7 @@ Please refer to [Rabbitmq Management Plugin Guide](https://www.rabbitmq.com/mana
 
 ### Set container hostname (Recommended)
 It is a good practice to use `--hostname` or `-h` option to choose a container hostname for the broker. You can also run broker in auto restart mode:
+	
 	$ docker run -d -P --name broker -h broker --restart always robomq/rabbitmq
 	
 ### Specify published ports (Recommended)
@@ -180,10 +181,10 @@ In environments without DNS service, as long as broker nodes can ping each other
 
 		$ docker run -d --name broker01 -h 192.168.1.101 \
 			-p 5672:5672 -p 1883:1883 -p 15672:15672 \
-	    	-p 4369:4369 -p 25672:25672 \
-	    	-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
-	    	-e RABBITMQ_USE_LONGNAME=true \
-	    	robomq/rabbitmq
+			-p 4369:4369 -p 25672:25672 \
+			-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
+			-e RABBITMQ_USE_LONGNAME=true \
+			robomq/rabbitmq
 2. From broker node 2, verify that head node can be reached via ports 4369 and 25672:
 
 		$ nc -z -v 192.168.1.101 4369
@@ -191,22 +192,22 @@ In environments without DNS service, as long as broker nodes can ping each other
 	Then start broker node 2 to join node 1:
 	
 		$ docker run -d --name broker02 -h 192.168.1.102 \
-		   	-p 5672:5672 -p 1883:1883 -p 15672:15672 \
-	    	-p 4369:4369 -p 25672:25672 \
-	    	-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
-	    	-e RABBITMQ_USE_LONGNAME=true \
-	    	-e HEAD_NODE=192.168.1.101 \
+			-p 5672:5672 -p 1883:1883 -p 15672:15672 \
+			-p 4369:4369 -p 25672:25672 \
+			-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
+			-e RABBITMQ_USE_LONGNAME=true \
+			-e HEAD_NODE=192.168.1.101 \
 			robomq/rabbitmq
 			
 3. You can add any number of additional nodes to join node 1:
 	  	
 		$ docker run -d --name broker03 -h 192.168.1.103 \
-	    	-p 5672:5672 -p 1883:1883 -p 15672:15672 \
-	    	-p 4369:4369 -p 25672:25672 \
-	    	-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
-	    	-e RABBITMQ_USE_LONGNAME=true \
-	    	-e HEAD_NODE=192.168.1.101 \
-	     	robomq/rabbitmq
+			-p 5672:5672 -p 1883:1883 -p 15672:15672 \
+			-p 4369:4369 -p 25672:25672 \
+			-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
+			-e RABBITMQ_USE_LONGNAME=true \
+			-e HEAD_NODE=192.168.1.101 \
+			robomq/rabbitmq
 	     
 	Broke03 logs should indicate success of cluster formation:
 		
@@ -239,18 +240,18 @@ The most common way to create broker cluster is to use short hostnames. Before p
 	$ ping -c 1 hostN
 
 To set up broker cluster using short hostnames,  set `RABBITMQ_USE_LONGNAME=false` or just remove it:
-
+				
 	$ docker run -d --name broker01 -h host1 \
 		-p 5672:5672 -p 1883:1883 -p 15672:15672 \
-    	-p 4369:4369 -p 25672:25672 \
-    	-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
-    	robomq/rabbitmq
+		-p 4369:4369 -p 25672:25672 \
+		-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
+		robomq/rabbitmq
     	
-    $ docker run -d --name broker02 -h host2 \
-      	-p 5672:5672 -p 1883:1883 -p 15672:15672 \
-    	-p 4369:4369 -p 25672:25672 \
-    	-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
-    	-e HEAD_NODE=host1 \
+	$ docker run -d --name broker02 -h host2 \
+		-p 5672:5672 -p 1883:1883 -p 15672:15672 \
+		-p 4369:4369 -p 25672:25672 \
+		-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
+		-e HEAD_NODE=host1 \
 		robomq/rabbitmq	
 ***Note***: In some environments, `$ nslookup hostN` fails but `$ nslookup hostN.example.com` succeeds. If you still want to use short hostnames, you need to add `--dns-search example.com` option to the commands. 
 			
@@ -260,20 +261,20 @@ In some restrictive environments, such as a private network, an internal DNS ser
  
 	$ nslookup hostN.dc1.example.com <Private-DNS-Server-IP>
 Specify DNS server and DNS search domain to handle this case:
-
+	
 	$ docker run -d --name broker01 -h host1 \
 		--dns=<Private-DNS-Server-IP> --dns-search=dc1.example.com \
 		-p 5672:5672 -p 1883:1883 -p 15672:15672 \
-    	-p 4369:4369 -p 25672:25672 \
-    	-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
-    	robomq/rabbitmq
+		-p 4369:4369 -p 25672:25672 \
+		-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
+		robomq/rabbitmq
     	
-    $ docker run -d --name broker02 -h host2 \
-    	--dns=<Private-DNS-Server-IP> --dns-search=dc1.example.com \
-      	-p 5672:5672 -p 1883:1883 -p 15672:15672 \
-    	-p 4369:4369 -p 25672:25672 \
-    	-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
-    	-e HEAD_NODE=host1 \
+	$ docker run -d --name broker02 -h host2 \
+		--dns=<Private-DNS-Server-IP> --dns-search=dc1.example.com \
+		-p 5672:5672 -p 1883:1883 -p 15672:15672 \
+		-p 4369:4369 -p 25672:25672 \
+		-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
+		-e HEAD_NODE=host1 \
 		robomq/rabbitmq	
 
 ### Manage broker cluster
@@ -302,20 +303,18 @@ Erlang cookie is saved in cookie file `/var/lib/rabbitmq/.erlang.cookie`. If vol
 ### Persist broker cluster data (Recommended)
 To persist broker cluster data and configurations, you should mount a volume for each broker node:
 
-
-    $ docker run -d --name broker01 -h host1 --restart always \
-    	-p 5672:5672 -p 1883:1883 -p 15672:15672 \
-    	-p 4369:4369 -p 25672:25672 \
-    	-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
-    	-v ${PWD}/hostdir:/var/lib/rabbitmq \
+	$ docker run -d --name broker01 -h host1 --restart always \
+		-p 5672:5672 -p 1883:1883 -p 15672:15672 \
+		-p 4369:4369 -p 25672:25672 \
+		-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
+		-v ${PWD}/hostdir:/var/lib/rabbitmq \
 		robomq/rabbitmq
-
-    $ docker run -d --name broker02 -h host2 --restart always \
-    	-p 5672:5672 -p 1883:1883 -p 15672:15672 \
-    	-p 4369:4369 -p 25672:25672 \
-    	-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
-    	-v ${PWD}/hostdir:/var/lib/rabbitmq \
-    	-e HEAD_NODE=host1 \
+	$ docker run -d --name broker02 -h host2 --restart always \
+		-p 5672:5672 -p 1883:1883 -p 15672:15672 \
+		-p 4369:4369 -p 25672:25672 \
+		-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
+		-v ${PWD}/hostdir:/var/lib/rabbitmq \
+		-e HEAD_NODE=host1 \
 		robomq/rabbitmq
 		
 Please replace `${PWD}/hostdir` with your designated folder on broker host to store the persistent data. In case any broker is removed, run command again to recreate it; the new broker will recover its data and configurations from the last known state. You can eve remove and recreate the whole cluster; the new cluster will recover from the last known state. This minimizes service interruption and data loss when you [upgrade the cluster](https://www.rabbitmq.com/clustering.html##upgrading) to a newer version. 
@@ -325,12 +324,12 @@ Please replace `${PWD}/hostdir` with your designated folder on broker host to st
 ### Use RAM node (for advanced users only) 
 Broker node can be either disk node or RAM node. By default, broker node runs as disk node. In some cases, you may set broker to RAM node to get better performance:
 
-    $ docker run -d --name broker03 -h host3 \
-    	-p 5672:5672 -p 1883:1883 -p 15672:15672 \
-    	-p 4369:4369 -p 25672:25672 \
-    	-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
-    	-e HEAD_NODE=host1 \
-    	-e RAM_NODE=true
+	$ docker run -d --name broker03 -h host3 \
+		-p 5672:5672 -p 1883:1883 -p 15672:15672 \
+		-p 4369:4369 -p 25672:25672 \
+		-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
+		-e HEAD_NODE=host1 \
+		-e RAM_NODE=true
 		robomq/rabbitmq
 You will see logs like:
 
@@ -369,7 +368,7 @@ In another use case, suppose you run a client container which links to the broke
 	$ docker run -d --name rabbit-service robomq/rabbitmq
 	$ docker run -d --name client-app --link rabbit-service:broker client-app-image
 	
-Finally, if you run broker in SWARM, Kubernetes, or similar environments, please refer to networking documents for more specific instructions. 
+Finally, if you run broker in Swarm, Kubernetes, or similar environments, please refer to networking documents for more specific instructions. 
 
 ## Get started with supported messaging protocols
 
