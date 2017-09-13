@@ -1,10 +1,10 @@
 # How to use this image 
 
-RoboMQ broker is a pre-configured messaging broker image built upon [RabbitMQ](https://www.rabbitmq.com/) 3.6.11. 
+RoboMQ broker is a pre-configured messaging broker image built upon [RabbitMQ](https://www.rabbitmq.com/) 3.6.12. 
 
-* [Standalone Broker](#standalone)
-* [Clustered Broker](#cluster)
-* [Network Settings](#network)
+* [Standalone Broker](#Option-1-Standalone-Broker)
+* [Clustered Broker](#Option-2-Clustered-Broker)
+* [Network Settings](#Network-Settings)
 
 ## Option 1: Standalone Broker
 
@@ -49,7 +49,7 @@ $ docker rm -v broker
 
 From the host running broker daemon, first find out which published port corresponds to container's private port 15672: 
 
-	$ docker port broker 15672 | cut -d : -f 2
+    $ docker port broker 15672 | cut -d : -f 2
 
 Then run the following command to list virtual hosts, after replacing `<user>:<password>` with values given in broker logs, and replacing `<ui-port>`with port number discovered in last step:
 
@@ -82,10 +82,12 @@ It is a good practice to use `--hostname` or `-h` option to choose a container h
 ### Specify published ports (Recommended)
 
 With `--publish all` or `-P` option, all exposed ports are published to some random ports. When this is not desired you can specify which ports are to be used:
+	
 	$ docker run -d --name broker \
 		-p 5672:5672 -p 1883:1883 -p 15672:15672 \
 		robomq/rabbitmq
-Specifying ports is necessary when running firewalled brokers. Choose ports that are permitted by firewall rules. Refer to [Network Settings](#network) for more details.
+		
+Specifying ports is necessary when running firewalled brokers. Choose ports that are permitted by firewall rules. Refer to [Network Settings](#network-settings) for more details.
 
 ### Set default user/password/vhost (Recommended)
 For better security, set default user, default password, default vhost, or any combination of these to your own choice:
