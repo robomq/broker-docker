@@ -9,41 +9,40 @@
 ## Option 1: Standalone Broker
 
 ### Run broker
-```bash
-$ docker run -d -P --name broker robomq/rabbitmq
-```
+
+	$ docker run -d -P --name broker robomq/rabbitmq
+
 You can choose a different container name by changing `--name broker`. To view status and port mapping of the broker daemon:
-```bash
-$ docker ps -f name=broker
-```
+
+	$ docker ps -f name=broker
+
 ### Read logs
-```bash
-$ docker logs broker
-```
+
+	$ docker logs broker
+
 You will see logs similar to:
 
-```	bash
-==========================================================================
-Broker rabbit@8823c6d94248 is running. Supports AMQP/MQTT by default.
-	
-	Default User     : admin
-	Default Password : 942b020d5962
-	Default Vhost    : /
-	ERLANG_COOKIE    : QAYBCTIFOSOIYVMABAED
-	
-Please update system generated default password by this command:
-$ docker exec <container> rabbitmqctl change_password admin <password>
-Web Management UI can be accessed with admin:942b020d5962 from:
-		http://<broker-host>:<ui-port>/
-To get <ui-port>, run: $ docker port <container> 15672 | cut -d : -f 2	
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-```
+	==========================================================================
+	Broker rabbit@8823c6d94248 is running. Supports AMQP/MQTT by default.
+
+		Default User     : admin
+		Default Password : 942b020d5962
+		Default Vhost    : /
+		ERLANG_COOKIE    : QAYBCTIFOSOIYVMABAED
+
+	Please update system generated default password by this command:
+	$ docker exec <container> rabbitmqctl change_password admin <password>
+	Web Management UI can be accessed with admin:942b020d5962 from:
+			http://<broker-host>:<ui-port>/
+	To get <ui-port>, run: $ docker port <container> 15672 | cut -d : -f 2	
+	++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 ### Restart, stop, or remove broker
-```bash
-$ docker restart broker
-$ docker stop broker
-$ docker rm -v broker
-```
+
+	$ docker restart broker
+	$ docker stop broker
+	$ docker rm -v broker
+
 ### Access web management UI
 ***Access web management UI from the same host***
 
@@ -69,6 +68,7 @@ If the broker runs behind a firewall which blocks `<ui-port>` access, you need t
 
 	$ docker rm -f -v broker
 	$ docker run -d -P -p 8080:15672 --name broker robomq/rabbitmq
+
 Open web browser from the other host and go to `http//<broker-host>:8080/`. In the same way, you can provide for [AMQP/MQTT](#network) port access across firewall.  
 
 ***How to use web management UI***
@@ -97,11 +97,11 @@ For better security, set default user, default password, default vhost, or any c
 		-e DEFAULT_USER=myuser -e DEFAULT_PASSWORD=mypass \
 		-e DEFAULT_VHOST=myvhost \ 
 		robomq/rabbitmq
+
 If you do not choose a password for default user, system will automatically generate a random password. You can either change it from web management UI or run this command:
 
 	docker exec <container> rabbitmqctl change_password <user> <password>
 		
-
 ### Persist broker data (Recommended)
 To persist broker data and configurations, mount a host directory to container volume `/var/lib/rabbitmq`: 
 	
@@ -127,6 +127,7 @@ You can mount startup config file `/etc/rabbitmq/rabbitmq.config`, `/etc/rabbitm
 		-v "$PWD"/rabbitmq.config:/etc/rabbitmq/rabbitmq.config \
 		-v "$PWD"/enabled_plugins:/etc/rabbitmq/enabled_plugins \
 		robomq/rabbitmq
+
 Please change `"$PWD"` to the full path of the host directory where you place these config files. When config files are mounted, their settings override conflicting environment variables:
 
 * When `rabbitmq.config` file is mounted, `DEFAULT_USER`, `DEFAULT_PASSWORD` and `DEFAULT_VHOST` are ignored.
@@ -143,6 +144,7 @@ Rabbitmq provides a CLI tool, rabbitmqctl, to manage broker. For example, to que
 	$ docker exec -it broker rabbitmqctl status
 	$ docker exec -it broker rabbitmqctl list_users
 	$ docker exec -it broker rabbitmqctl list_vhosts	
+
 Please refer to [rabbitmqctl manual page](https://www.rabbitmq.com/man/rabbitmqctl.1.man.html) for how to use this tool to manage your broker.
 
 ### Tune performance
@@ -151,11 +153,13 @@ The default memory threshold at which memory alarm and [flow control](https://ww
 	$ docker run -d -P --name broker \
 		-e RABBITMQ_VM_MEMORY_HIGH_WATERMARK=0.4 \
 		robomq/rabbitmq	
+
 You can also precompile parts of RabbitMQ with HiPE (High Performance Erlang Engine):
 	
 	$ docker run -d -P --name broker \
 		-e RABBITMQ_HIPE_COMPILE=true \
 		robomq/rabbitmq	
+
 This will increase server throughput at the cost of increased startup time. Performance varies, but you might see 20-50% improvement at the cost of a few minutes delay at startup. 
 
 ## Option 2: Clustered Broker
@@ -228,6 +232,7 @@ Although using IP addresses works, the standard way is to use hostnames. Before 
 		
 	$ nslookup hostN.example.com
 	$ ping -c 1 hostN.example.com 
+
 Run the commands in last section to create the cluster, after replacing `192.168.1.10N` with `hostN.example.com`.
 
 ***Note***: To create a standalone broker, `--hostname` or `-h` is optional and you can choose any value for container's hostname. However, to create clustered brokers, you must assign container hostnames resolvable by all broker nodes. In our example, broker container hostnames are set to server/VM hostnames; therefore, broker nodes can rely on server/VMs' DNS settings to resolve each other without additional DNS and network setup. 
@@ -253,6 +258,7 @@ To set up broker cluster using short hostnames,  set `RABBITMQ_USE_LONGNAME=fals
 		-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
 		-e HEAD_NODE=host1 \
 		robomq/rabbitmq	
+
 ***Note***: In some environments, `$ nslookup hostN` fails but `$ nslookup hostN.example.com` succeeds. If you still want to use short hostnames, you need to add `--dns-search example.com` option to the commands. 
 			
 ***Clustering in private DNS setting***
@@ -260,6 +266,7 @@ To set up broker cluster using short hostnames,  set `RABBITMQ_USE_LONGNAME=fals
 In some restrictive environments, such as a private network, an internal DNS server is set up to resolve private hostnames and private IP addresses. For example, if a company `example.com` has a private subnet or zone `dc1`, and this zone has a broker node N with short hostname `hostN`, then broker node N has a private FQDN of "hostN.dc1.example.com":
  
 	$ nslookup hostN.dc1.example.com <Private-DNS-Server-IP>
+
 Specify DNS server and DNS search domain to handle this case:
 	
 	$ docker run -d --name broker01 -h host1 \
@@ -292,8 +299,7 @@ Specify DNS server and DNS search domain to handle this case:
 
 ### Choose your own shared secret (Recommended)
 
-The broker nodes authenticate to each other using a shared secret, called the  [Erlang Cookie](https://www.rabbitmq.com/clustering.html).
-The cookie is just an alphanumeric string. It can be of any length. All cluster nodes must have the same cookie. For security reason, please choose a long string as your own cookie in production, and replace `ClusterSecret2468` with it in the commands. In testing environment, you can also choose not to pass `RABBITMQ_ERLANG_COOKIE` when creating head node. In this case, head node will create a random cookie automatically, which can then be used to create other nodes. 
+The broker nodes authenticate to each other using a shared secret, called the  [Erlang Cookie](https://www.rabbitmq.com/clustering.html). The cookie is just an alphanumeric string. It can be of any length. All cluster nodes must have the same cookie. For security reason, please choose a long string as your own cookie in production, and replace `ClusterSecret2468` with it in the commands. In testing environment, you can also choose not to pass `RABBITMQ_ERLANG_COOKIE` when creating head node. In this case, head node will create a random cookie automatically, which can then be used to create other nodes. 
 
 Erlang cookie is saved in cookie file `/var/lib/rabbitmq/.erlang.cookie`. If volume `/var/lib/rabbitmq/` is mounted (see next section), you can supply a cookie file before broker creation. The cookie file content overrides `RABBITMQ_ERLANG_COOKIE` when both are present; moreover, if the values mismatch, you will get a warning:
 
@@ -309,6 +315,7 @@ To persist broker cluster data and configurations, you should mount a volume for
 		-e RABBITMQ_ERLANG_COOKIE=ClusterSecret2468 \
 		-v ${PWD}/hostdir:/var/lib/rabbitmq \
 		robomq/rabbitmq
+		
 	$ docker run -d --name broker02 -h host2 --restart always \
 		-p 5672:5672 -p 1883:1883 -p 15672:15672 \
 		-p 4369:4369 -p 25672:25672 \
@@ -331,6 +338,7 @@ Broker node can be either disk node or RAM node. By default, broker node runs as
 		-e HEAD_NODE=host1 \
 		-e RAM_NODE=true
 		robomq/rabbitmq
+
 You will see logs like:
 
 	Broker rabbit@broker03 is running as a ram node. Supports AMQP/MQTT by default.
@@ -348,6 +356,7 @@ The image exposes the following ports by default:
 	* Management UI: 15672 
 	
 	These ports are used by clients to access or manage broker service. Please check your firewall settings, and map these internal ports to permissible ports.     
+
 2.  Ports used by clustered broker nodes, not applicable to standalone setup:
 	* Peer discovery: 4369
 	* Inter-node communication: 25672
