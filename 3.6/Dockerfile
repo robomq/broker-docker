@@ -67,7 +67,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY start-rabbit.sh /usr/local/bin/
 
 # white label web management UI
-COPY rabbitmqlogo.png favicon.ico /
+COPY robomqlogo.png favicon.ico /
 RUN set -ex; \
     apt-get update && apt-get install -y --no-install-recommends \
         unzip zip; \
@@ -77,7 +77,7 @@ RUN set -ex; \
     # make changes
     # icons
     mv favicon.ico rabbitmq_management-3.6.12/priv/www/favicon.ico; \
-    mv rabbitmqlogo.png rabbitmq_management-3.6.12/priv/www/img/rabbitmqlogo.png; \
+    mv robomqlogo.png rabbitmq_management-3.6.12/priv/www/img/robomqlogo.png; \
     # title
     sed -i 's/RabbitMQ Management/RoboMQ Management/' rabbitmq_management-3.6.12/priv/www/index.html; \
     # colors
@@ -86,9 +86,11 @@ RUN set -ex; \
     sed -i 's/#f88/#188bcd/' rabbitmq_management-3.6.12/priv/www/css/main.css; \
     # autocomplete for security
     sed -i 's/name="password"/name="password" autocomplete="off"/' rabbitmq_management-3.6.12/priv/www/js/tmpl/login.ejs; \
-    # logo size
-    sed -i '/rabbitmqlogo.png/ s/width="204" height="37"/width="180" height="45"/' rabbitmq_management-3.6.12/priv/www/js/tmpl/login.ejs; \
-    sed -i '/rabbitmqlogo.png/ s/width="204" height="37"/width="180" height="45"/' rabbitmq_management-3.6.12/priv/www/js/tmpl/layout.ejs; \
+    # replace logo
+    sed -i '/rabbitmqlogo.png/ s/rabbitmqlogo.png/robomqlogo.png/' rabbitmq_management-3.6.12/priv/www/js/tmpl/login.ejs; \
+    sed -i '/rabbitmqlogo.png/ s/rabbitmqlogo.png/robomqlogo.png/' rabbitmq_management-3.6.12/priv/www/js/tmpl/layout.ejs; \
+    sed -i '/robomqlogo.png/ s/width="204" height="37"/width="180" height="45"/' rabbitmq_management-3.6.12/priv/www/js/tmpl/login.ejs; \
+    sed -i '/robomqlogo.png/ s/width="204" height="37"/width="180" height="45"/' rabbitmq_management-3.6.12/priv/www/js/tmpl/layout.ejs; \
 
     zip /usr/lib/rabbitmq/lib/rabbitmq_server-3.6.12/plugins/rabbitmq_management-3.6.12.ez -r rabbitmq_management-3.6.12/*; \
     rm -rf rabbitmq_management-3.6.12; \
