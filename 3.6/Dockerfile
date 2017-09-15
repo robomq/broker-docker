@@ -1,5 +1,4 @@
 FROM ubuntu:17.04
-MAINTAINER Yi Lin <yi.lin@robomq.com>
 
 # perequisites: logroate, socat for rabbitmq
 RUN set -ex; \
@@ -87,10 +86,8 @@ RUN set -ex; \
     # autocomplete for security
     sed -i 's/name="password"/name="password" autocomplete="off"/' rabbitmq_management-3.6.12/priv/www/js/tmpl/login.ejs; \
     # replace logo
-    sed -i '/rabbitmqlogo.png/ s/rabbitmqlogo.png/robomqlogo.png/' rabbitmq_management-3.6.12/priv/www/js/tmpl/login.ejs; \
-    sed -i '/rabbitmqlogo.png/ s/rabbitmqlogo.png/robomqlogo.png/' rabbitmq_management-3.6.12/priv/www/js/tmpl/layout.ejs; \
-    sed -i '/robomqlogo.png/ s/width="204" height="37"/width="180" height="45"/' rabbitmq_management-3.6.12/priv/www/js/tmpl/login.ejs; \
-    sed -i '/robomqlogo.png/ s/width="204" height="37"/width="180" height="45"/' rabbitmq_management-3.6.12/priv/www/js/tmpl/layout.ejs; \
+    sed -i 's/rabbitmqlogo.png" width="204" height="37"/robomqlogo.png" width="180" height="45"/' rabbitmq_management-3.6.12/priv/www/js/tmpl/login.ejs; \
+    sed -i 's/rabbitmqlogo.png" width="204" height="37"/robomqlogo.png" width="180" height="45"/' rabbitmq_management-3.6.12/priv/www/js/tmpl/layout.ejs; \
 
     zip /usr/lib/rabbitmq/lib/rabbitmq_server-3.6.12/plugins/rabbitmq_management-3.6.12.ez -r rabbitmq_management-3.6.12/*; \
     rm -rf rabbitmq_management-3.6.12; \
