@@ -64,6 +64,7 @@ Please refer to [Rabbitmq Clustering Guide - Firewalled nodes](https://www.rabbi
 Standalone setup runs a single docker instance of RoboMQ broker. It is suitable for development or prototyping. For the production deployments, **clustered setup** should be used.
 
 ##### 2.1 Run the broker
+
 ```bash
 $ docker run -d --name mybroker -p 5672:5672 -p 1883:1883 -p 15672:15672 --restart always robomq/broker
 ```
@@ -77,10 +78,12 @@ You can choose a different container name by changing the --name option
 These are the common management tasks that apply to the broker setup both in the standalone as well as clustered setup. 
 
 ##### 3.1 Show status of the running broker container:
+
 ```bash
 $ docker ps -f name=<container name> ```
 
 ##### 3.2 Restart, stop, or remove broker
+
 ```bash
 $ docker restart <container name> 
 $ docker stop <container name> 
@@ -88,6 +91,7 @@ $ docker rm -v <container name>
 ```
 
 ##### 3.3 View the broker container logs
+
 ```bash
 $ docker logs <container name> 
 ```
@@ -107,6 +111,7 @@ Broker rabbit@8823c6d94248 is running. Supports AMQP/MQTT by default.
 
 ##### 3.4 Update system generated default password for admin user
 Use this command executing through a shell in the broker container:
+
 ```bash
 $ docker exec <container name> rabbitmqctl change_password admin <password>
 ```
@@ -155,6 +160,7 @@ $ docker run -d --name <container name> \
 ```
 
 If you do not choose a password for default user at first run, system will automatically generate a random password for the default  user. You can either change that default user and password combination from the web management UI or run this command:
+
 ```bash
 $ docker exec <container name> rabbitmqctl change_password <user> <password>
 ```
@@ -233,6 +239,7 @@ Please change `path-to-host` to the full path of the host directory where you 
 
 ##### 3.10 Enable/disable web management UI
 By default web management UI is enabled on all nodes in a cluster. You can keep the management UI up on few nodes on the cluster and disable it on others to conserve resources. For example, to start broker03 with web management UI disabled, use the following command with flag `WEB_MANAGE_UI=false `:
+
 ```bash
 $ docker run –d --name <container name> \
     -p 5672:5672 -p 1883:1883 -p 15672:15672 -h broker \
@@ -242,6 +249,7 @@ $ docker run –d --name <container name> \
 ##### 3.11 Set log level
 
 Connection related events are logged to console, with default verbosity level of info. The supported options are `debug|info|warning|error|none`:
+
 ```bash
 $ docker run -d --name <container name> \
     -p 5672:5672 -p 1883:1883 -p 15672:15672 -h myhost \
@@ -263,6 +271,7 @@ Please refer to [rabbitmqctl manual page](https://www.rabbitmq.com/man/rabbitmq
 
 ##### 3.13 Tune performance (For advanced users)
 The default memory threshold at which memory alarm and [flow control](https://www.rabbitmq.com/memory.html) are triggered is 0.8, or 80% of installed RAM or available virtual memory address space. The advanced user can tune it to desired value. For example the below script sets the threshold to 40% or 0.4:
+
 ```bash
 $ docker run -d --name <container name> \
     -e RABBITMQ_VM_MEMORY_HIGH_WATERMARK=0.4 \
@@ -271,6 +280,7 @@ $ docker run -d --name <container name> \
 
 
 You can also precompile parts of RabbitMQ with HiPE (High Performance Erlang Engine):
+
 ```bash
 $ docker run -d --name <container name> \
     -e RABBITMQ_HIPE_COMPILE=true \
@@ -306,6 +316,7 @@ The erlang cookie is saved in cookie file, `/var/lib/rabbitmq/.erlang.cookie`. 
 
 ##### 4.3.1 Clustering using long hostname or FQDN
 1. Start broker node 1 with hostname "host1.example.com"as head node of the cluster:
+
 ```bash
 $ docker run -d --name broker01 -h host1.example.com \
 -p 5672:5672 -p 1883:1883 -p 15672:15672 \
@@ -316,11 +327,13 @@ $ docker run -d --name broker01 -h host1.example.com \
 ```
 
 2. From host for broker node 2 with hostname "host2.example.com", verify that head node (broker01) can be reached via ports 4369 and 25672:
+
 ```bash
 $ nc -z -v host1.example.com 4369
 $ nc -z -v host1.example.com 25672
 ```
 Then start broker node 2 to join node 1:
+
 ```bash
 $ docker run -d --name broker02 -h host2.example.com \
  -p 5672:5672 -p 1883:1883 -p 15672:15672 \
@@ -332,6 +345,7 @@ $ docker run -d --name broker02 -h host2.example.com \
 ```
 
 3. You can add any number of additional nodes to join node 1 or the headnode, for example add node 3 with hostname "host3.example.com":
+
 ```bash
 $ docker run -d --name broker03 -h host3.example.com \
 -p 5672:5672 -p 1883:1883 -p 15672:15672 \
@@ -352,13 +366,15 @@ Success: Join cluster with HEAD_NODE: rabbit@host1.example.com
     'rabbit@host3.example.com']},
 ```
 **You can also check the cluster status with following command on any node:**
-```
-$ docker exec broker01 rabbitmqctl cluster_status```
 
+```bash
+$ docker exec broker01 rabbitmqctl cluster_status
+```
 
 
 ##### 4.3.2 Clustering using short hostname
 The following is a more common way to create broker cluster using short hostnames.  Before proceeding, verify that all hosts are DNS-reachable via short hostnames:
+
 ```bash
 $ ping hostname
 ```
@@ -366,6 +382,7 @@ $ ping hostname
 To set up broker cluster using short hostnames, set `RABBITMQ_USE_LONGNAME=false` or just remove it:
 
 1. Start broker node 1 with hostname "host1"as head node of the cluster:
+
 ```bash
 $ docker run -d --name broker01 -h host1 \
     -p 5672:5672 -p 1883:1883 -p 15672:15672 \
@@ -373,7 +390,9 @@ $ docker run -d --name broker01 -h host1 \
     -e RABBITMQ_ERLANG_COOKIE=ClusterSecret \
     --restart always robomq/broker
 ```
+
 2. Then start broker node 2 with hostname "host2" to join node 1:
+
 ```bash
 $ docker run -d --name broker02 -h host2 \
     -p 5672:5672 -p 1883:1883 -p 15672:15672 \
@@ -382,7 +401,9 @@ $ docker run -d --name broker02 -h host2 \
     -e HEAD_NODE=host1 \
     --restart always robomq/broker
 ```
+
 3. You can add any number of additional nodes to join node 1, for example add node 3 with hostname "host3":
+
 ```bash
 docker run -d --name broker03 -h host3 \
     -p 5672:5672 -p 1883:1883 -p 15672:15672 \
@@ -397,11 +418,13 @@ docker run -d --name broker03 -h host3 \
 
 ##### 4.3.3 Clustering in private DNS setting (For advanced users)
 In some restrictive environments, such as a private network, an internal DNS server is set up to resolve private hostnames.  For example, if a company example.com has a private subnet or zone dc1, and this zone has a broker node N with short hostname hostN, then broker node N has a private FQDN of "hostN.dc1.example.com":
+
 ```bash
 $ nslookup hostN.dc1.example.com
 ```
 
 Specify DNS server and DNS search domain to handle this case:
+
 ```bash
 $ docker run -d --name broker01 -h host1 \
     --dns=<Private-DNS-Domain> --dns-search=dc1.example.com \
@@ -432,14 +455,17 @@ $ docker run -d --name broker03 -h host3 \
 To manage and retrieve status of running broker cluster here are some helpful command line tools and tips:
 
 1.  Retrieve cluster status of individual nodes from the logs:
+
 ```bash
 $ docker logs broker01
 ```
 
 2. View the nodes currently joined in a cluster through rabbitmq cluster status command:
+
 ```bash
 $ docker exec broker01 rabbitmqctl cluster_status
 ```
+
 3. Access web management UI using login credentials given in head node logs when it is created.
 4. Specify the `DEFAULT_USER`, `DEFAULT_PASSWORD`, `DEFAULT_VHOST` when creating the head node (recommended to achieve better security).
 5. Enable/disable web management UI for any broker node (by default it is enabled for all nodes). In a large cluster it might be a better idea to save resources and enable management UI in selected nodes only. 
@@ -449,6 +475,7 @@ $ docker exec broker01 rabbitmqctl cluster_status
 
 ##### 4.5 Use RAM node (for advanced users only)
 Broker nodes can be either disk node or RAM node.  By default, a broker node runs as a disk node.  In some cases, you may set broker to RAM node to get better performance. For example, to start broker03 as RAM Node:
+
 ```bash
 $ docker run -d --name broker03 -h host3 \
     -p 5672:5672 -p 1883:1883 -p 15672:15672 \
@@ -460,8 +487,6 @@ $ docker run -d --name broker03 -h host3 \
 ```
 
 RAM node is a special case so use with care.  [See RabbitMQ Clustering Guide - Clusters with RAM nodes](https://www.rabbitmq.com/clustering.html#ram-nodes) and if in doubt, use the default disc node.
-
-
 
 
 # **Get started with supported messaging protocols**
